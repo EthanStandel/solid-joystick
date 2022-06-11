@@ -12,3 +12,6 @@ execSync("git checkout gh-pages")
 const iframeDotHtml = readFileSync("./iframe.html", { encoding: "utf8" });
 
 writeFileSync("./iframe.html", iframeDotHtml.replace("<script type=\"module\" crossorigin src=\"/assets/", "<script type=\"module\" crossorigin src=\"/solid-joystick/assets/"));
+
+execSync("git commit -am \"fix: bad-deploy-path\"")
+execSync("git checkout main");
