@@ -1,8 +1,12 @@
 const { execSync } = require("child_process");
 const { readFileSync, writeFileSync } = require("fs");
 
-execSync("git branch -D gh-pages")
+try {
+  execSync("git branch -D gh-pages")
+} catch {}
+try {
 execSync("git pull")
+} catch {}
 execSync("git checkout gh-pages")
 
 const iframeDotHtml = readFileSync("./iframe.html", { encoding: "utf8" });
