@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix .",
     "start": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "deploy-storybook": "storybook-to-ghpages",
+    "deploy-storybook": "storybook-to-ghpages && npm run fix-deploy",
     "fix-deploy": "node ./scripts/fix-storybook-to-ghpages-deploy.js"
   },
   "license": "MIT",
