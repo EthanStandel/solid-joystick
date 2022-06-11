@@ -1,5 +1,5 @@
-import { Component } from 'solid-js';
-import './button.css';
+import { Component } from "solid-js";
+import "./button.css";
 
 export interface ButtonProps {
   /**
@@ -13,7 +13,7 @@ export interface ButtonProps {
   /**
    * How large should the button be?
    */
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   /**
    * Button contents
    */
@@ -29,22 +29,23 @@ export interface ButtonProps {
  */
 export const Button: Component<ButtonProps> = ({
   primary = false,
-  size = 'medium',
+  size = "medium",
   backgroundColor,
   label,
   onClick,
 }) => {
   return (
-    <button 
+    <button
       type="button"
       style={{ "background-color": backgroundColor }}
       onClick={onClick}
       class={[
-        'storybook-button',
-        `storybook-button--${size}`, 
-        primary ? 'storybook-button--primary' : 'storybook-button--secondary'
-      ].join(' ')}>
-        {label}
+        "storybook-button",
+        `storybook-button--${size}`,
+        primary ? "storybook-button--primary" : "storybook-button--secondary",
+      ].join(" ")}
+    >
+      {label}
     </button>
   );
 };
