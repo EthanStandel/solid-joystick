@@ -5,7 +5,7 @@ import { Joystick } from "./Joystick";
 export default {
   title: "Example/Joystick",
   argTypes: {
-    // auto-detected
+    onMove: { action: "onMove" },
   },
 };
 
@@ -70,6 +70,10 @@ General.args = {
     justify-content: center;
     align-items: center;
     transition: box-shadow 0.3s ease;
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
     &:active,
     &:focus-visible {
       box-shadow: 0px 0px 10px black;
