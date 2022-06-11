@@ -15,7 +15,8 @@ export const Joystick: Component<Joystick.Props> = ({
     dragging: false,
   };
 
-  const handleMouseMove = (event: MouseEvent) => {
+  const handlePointerMove = (event: PointerEvent) => {
+    event.preventDefault();
     if (state.dragging && base) {
       const radius = base.clientWidth / 2;
       const xOffset = event.screenX - state.initialOffsets.x;
@@ -31,9 +32,6 @@ export const Joystick: Component<Joystick.Props> = ({
           : Geometry.getMaxY(xOffset, yOffset, radius);
       setXOffset(handleXOffset);
       setYOffset(handleYOffset);
-      console.log(
-        offsetHypotenuse > radius ? 100 : (offsetHypotenuse / radius) * 100,
-      );
       onMove?.({
         offset: { x: handleXOffset, y: handleYOffset },
         angle: {
@@ -49,8 +47,8 @@ export const Joystick: Component<Joystick.Props> = ({
     }
   };
 
-  const handleMouseUp = () => {
-    window.removeEventListener("mousemove", handleMouseMove);
+  const handlePointerUp = () => {
+    window.removeEventListener("pointermove", handlePointerMove);
     state = { dragging: false };
     setShouldTransition(true);
     setYOffset(0);
@@ -62,9 +60,9 @@ export const Joystick: Component<Joystick.Props> = ({
     });
   };
 
-  const handleMouseDown = (event: MouseEvent) => {
-    window.addEventListener("mouseup", handleMouseUp, { once: true });
-    window.addEventListener("mousemove", handleMouseMove);
+  const handlePointerDown = (event: PointerEvent) => {
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
     setShouldTransition(false);
     state = {
       dragging: true,
@@ -78,7 +76,7 @@ export const Joystick: Component<Joystick.Props> = ({
   return (
     <div ref={base} class={cx(styles.base, baseClass)}>
       <button
-        onmousedown={handleMouseDown}
+        onpointerdown={handlePointerDown}
         class={cx(styles.handle, handleClass)}
         style={{
           transform: `translate(${xOffset()}px,${yOffset()}px)`,
@@ -136,6 +134,7 @@ const styles = {
   handle: css`
     all: unset;
     cursor: grab;
+    touch-action: none;
   `,
 };
 

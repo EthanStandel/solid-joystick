@@ -9,7 +9,8 @@
     "serve": "vite preview",
     "lint:fix": "eslint --fix .",
     "start": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "storybook-to-ghpages"
   },
   "license": "MIT",
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@storybook/client-logger": "6.5.0-alpha.61",
     "@storybook/core-common": "6.5.0-alpha.61",
     "@storybook/html": "6.5.0-alpha.61",
+    "@storybook/storybook-deployer": "^2.8.11",
     "@storybook/testing-library": "^0.0.12",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
