@@ -16,6 +16,8 @@
   "rules": {
     // evidently doesn't resolve esm, real issues should break builds anyways
     "import/no-unresolved": ["off"],
+    "@typescript-eslint/no-namespace": ["off"],
+    "import/export": ["off"],
     // this rule is stupid
     "no-restricted-globals": ["off"],
     "prettier/prettier": ["error", {}, { "usePrettierrc": true }],

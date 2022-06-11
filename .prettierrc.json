@@ -2,7 +2,8 @@
   "arrowParens": "avoid",
   "parser": "typescript",
   "quotes": "double",
-  "printWidth": 100,
+  "printWidth": 80,
   "semi": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "bracketSameLine": false
 }
