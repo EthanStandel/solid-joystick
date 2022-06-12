@@ -19,5 +19,8 @@ export default defineConfig({
       name: "solid-joystick",
       fileName: format => `lib.${format}.js`,
     },
+    rollupOptions: {
+      external: ["solid-js"],
+    },
   },
 });
