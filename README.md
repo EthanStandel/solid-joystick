@@ -1,34 +1,98 @@
+# solid-joystick
+
+A joystick component built in and for use in SolidJS applications with zero runtime dependencies.
+
+The development-time flow utilizes Storybook using the @storybook/html flow as Solid lacks official Storybook support and the project is built with Vite.
+
+## [Demo example](https://ethanstandel.github.io/solid-joystick/)
+
 ## Usage
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+### Install
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
-
-```bash
-$ npm install # or pnpm install or yarn install
+```sh
+npm i solid-joystick
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+### Import
 
-## Available Scripts
+```ts
+import { Joystick } from "solid-joystick";
+```
 
-In the project directory, you can run:
+### Important types
 
-### `npm dev` or `npm start`
+```ts
+export namespace Joystick {
+  /* props for the Joystick component */
+  export type Props = {
+    /* the event that fires when the joystick is moved */
+    onMove?: (event: MoveEvent) => void;
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    /* disable the boundaries for the joystick handle */
+    disableBounding?: boolean;
 
-The page will reload if you make edits.<br>
+    /* disable the transition animation that resets the handle location after "letting go" */
+    disableResetAnimation?: boolean;
 
-### `npm run build`
+    /* disables the automatic return to center after "letting go" of the handle  */
+    disableReset?: boolean;
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+    /* defines the animation that fires for the reset event after "letting go" of the handle */
+    /* default: ".2s ease" */
+    resetAnimation?: string;
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+    /* native props which are passed forward to the "base" element (the bounding element) */
+    baseProps: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
 
-## Deployment
+    /* native props which are passed forward to the "handle" element (the grabbable element) */
+    handleProps: Omit<
+      JSX.HTMLAttributes<HTMLButtonElement>,
+      "onpointerdown" | "style"
+    >;
+  };
 
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+  /* The data which is forwarded when the handle is moved */
+  export type MoveEvent = {
+    /* the offset, in pixels, that the handle has been dragged from its initial position */ 
+    offset: {
+      x: number;
+      y: number;
+    };
+
+    /* the angle that the joystick has been dragged, offered in both radians & degrees */
+    angle: {
+      radians: number;
+      degrees: number;
+    };
+
+    /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
+    pressure: {
+      pixels: number;
+      percentage: number;
+    };
+  };
+}
+```
+
+
+onMove?: (event: MoveEvent) => void;
+disableBounding?: boolean;
+disableResetAnimation?: boolean;
+resetAnimation?: string;
+disableReset?: boolean;
+baseProps: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style"  "ref">;
+handleProps: Omit<
+JSX.HTMLAttributes<HTMLButtonElement>,
+"onpointerdown" "style"
+
+## Contributing
+
+Storybook can be run with the following commands. Please fork and open a PR if you would like to have your changes merged. Otherwise feel free to file issues.
+
+```sh
+git clone https://github.com/EthanStandel/solid-joystick.git
+cd solid-joystick
+npm i
+npm start
+```
