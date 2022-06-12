@@ -25,7 +25,6 @@ type TemplateOptions = {
   disableX: boolean;
   disableY: boolean;
   disableReset: boolean;
-  disableBounding: boolean;
   throttleEventsBy: number;
   handleChildren: string;
   baseStyles: string;
@@ -103,7 +102,6 @@ Styled.args = {
   disableX: false,
   disableY: false,
   disableReset: false,
-  disableBounding: false,
   throttleEventsBy: 0,
   resetAnimation: ".2s ease /* default */",
   disableResetAnimation: false,
@@ -160,7 +158,6 @@ Unstyled.args = {
   disableX: false,
   disableY: false,
   disableReset: false,
-  disableBounding: false,
   throttleEventsBy: 0,
   resetAnimation: ".2s ease /* default */",
   disableResetAnimation: false,
