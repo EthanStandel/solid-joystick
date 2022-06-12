@@ -120,10 +120,10 @@ export namespace Joystick {
     resetAnimation?: string;
 
     /* native props which are passed forward to the "base" element (the bounding element) */
-    baseProps: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
+    baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
 
     /* native props which are passed forward to the "handle" element (the grabbable element) */
-    handleProps: Omit<
+    handleProps?: Omit<
       JSX.HTMLAttributes<HTMLButtonElement>,
       "onpointerdown" | "style"
     >;
