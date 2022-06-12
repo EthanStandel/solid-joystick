@@ -73,17 +73,6 @@ export type JoystickMoveEvent = {
 };
 ```
 
-
-onMove?: (event: MoveEvent) => void;
-disableBounding?: boolean;
-disableResetAnimation?: boolean;
-resetAnimation?: string;
-disableReset?: boolean;
-baseProps: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style"  "ref">;
-handleProps: Omit<
-JSX.HTMLAttributes<HTMLButtonElement>,
-"onpointerdown" "style"
-
 ## Contributing
 
 Storybook can be run with the following commands. Please fork and open a PR if you would like to have your changes merged. Otherwise feel free to file issues.
