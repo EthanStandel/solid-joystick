@@ -3,7 +3,7 @@ import type { JSX } from "solid-js/types";
 
 import { Trig } from "../utils/Trig";
 
-export const Joystick: Component<Joystick.Props> = ({
+export const Joystick: Component<JoystickProps> = ({
   onMove,
   disableReset,
   disableResetAnimation,
@@ -100,56 +100,54 @@ export const Joystick: Component<Joystick.Props> = ({
   );
 };
 
-export namespace Joystick {
-  /* props for the Joystick component */
-  export type Props = {
-    /* the event that fires when the joystick is moved */
-    onMove?: (event: MoveEvent) => void;
+/* props for the Joystick component */
+export type JoystickProps = {
+  /* the event that fires when the joystick is moved */
+  onMove?: (event: JoystickMoveEvent) => void;
 
-    /* disable the boundaries for the joystick handle */
-    disableBounding?: boolean;
+  /* disable the boundaries for the joystick handle */
+  disableBounding?: boolean;
 
-    /* disable the transition animation that resets the handle location after "letting go" */
-    disableResetAnimation?: boolean;
+  /* disable the transition animation that resets the handle location after "letting go" */
+  disableResetAnimation?: boolean;
 
-    /* disables the automatic return to center after "letting go" of the handle  */
-    disableReset?: boolean;
+  /* disables the automatic return to center after "letting go" of the handle  */
+  disableReset?: boolean;
 
-    /* defines the animation that fires for the reset event after "letting go" of the handle */
-    /* default: ".2s ease" */
-    resetAnimation?: string;
+  /* defines the animation that fires for the reset event after "letting go" of the handle */
+  /* default: ".2s ease" */
+  resetAnimation?: string;
 
-    /* native props which are passed forward to the "base" element (the bounding element) */
-    baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
+  /* native props which are passed forward to the "base" element (the bounding element) */
+  baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
 
-    /* native props which are passed forward to the "handle" element (the grabbable element) */
-    handleProps?: Omit<
-      JSX.HTMLAttributes<HTMLButtonElement>,
-      "onpointerdown" | "style"
-    >;
+  /* native props which are passed forward to the "handle" element (the grabbable element) */
+  handleProps?: Omit<
+    JSX.HTMLAttributes<HTMLButtonElement>,
+    "onpointerdown" | "style"
+  >;
+};
+
+/* The data which is forwarded when the handle is moved */
+export type JoystickMoveEvent = {
+  /* the offset, in pixels, that the handle has been dragged from its initial position */
+  offset: {
+    x: number;
+    y: number;
   };
 
-  /* The data which is forwarded when the handle is moved */
-  export type MoveEvent = {
-    /* the offset, in pixels, that the handle has been dragged from its initial position */
-    offset: {
-      x: number;
-      y: number;
-    };
-
-    /* the angle that the joystick has been dragged, offered in both radians & degrees */
-    angle: {
-      radians: number;
-      degrees: number;
-    };
-
-    /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
-    pressure: {
-      pixels: number;
-      percentage: number;
-    };
+  /* the angle that the joystick has been dragged, offered in both radians & degrees */
+  angle: {
+    radians: number;
+    degrees: number;
   };
-}
+
+  /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
+  pressure: {
+    pixels: number;
+    percentage: number;
+  };
+};
 
 const initialStates = {
   handleState: () => ({
