@@ -10,9 +10,10 @@ export const Joystick: Component<JoystickProps> = ({
   disabled,
   disableX,
   disableY,
+  boundingModel = "center",
+  boundaryModifier = 0,
   throttleEventsBy = 0,
   resetAnimation = ".2s ease",
-  disableBounding = false,
   baseProps = {},
   handleProps = {},
 }) => {
@@ -21,6 +22,7 @@ export const Joystick: Component<JoystickProps> = ({
   const [shouldTransition, setShouldTransition] = createSignal(false);
   let handleState = initialStates.handleState();
   let baseRef: HTMLDivElement | undefined;
+  let handleRef: HTMLButtonElement | undefined;
 
   const onMoveThrottled = (() => {
     if (onMove && throttleEventsBy !== 0) {
@@ -39,8 +41,17 @@ export const Joystick: Component<JoystickProps> = ({
 
   const handlePointerMove = (event: PointerEvent) => {
     event.preventDefault();
-    if (handleState.dragging && baseRef && !disabled) {
-      const radius = baseRef!.clientWidth / 2;
+    if (handleState.dragging && baseRef && handleRef && !disabled) {
+      const edgeBoundingModifier =
+        boundingModel === "inner" || boundingModel === "outer"
+          ? Math.max(handleRef.clientWidth, handleRef.clientHeight) / 2
+          : 0;
+      const radius =
+        baseRef.clientWidth / 2 +
+        (boundingModel === "outer"
+          ? edgeBoundingModifier
+          : -edgeBoundingModifier) +
+        boundaryModifier;
       const xOffset = disableX
         ? 0
         : event.clientX - handleState.initialOffsets.x;
@@ -51,12 +62,12 @@ export const Joystick: Component<JoystickProps> = ({
       const radians = Trig.angleRadians(xOffset, yOffset);
       const handleXOffset = disableX
         ? 0
-        : offsetHypotenuse < radius || disableBounding
+        : offsetHypotenuse < radius || boundingModel === "none"
         ? xOffset
         : Trig.getMaxX(radians, radius);
       const handleYOffset = disableY
         ? 0
-        : offsetHypotenuse < radius || disableBounding
+        : offsetHypotenuse < radius || boundingModel === "none"
         ? yOffset
         : Trig.getMaxY(radians, radius);
       setXOffset(handleXOffset);
@@ -69,11 +80,11 @@ export const Joystick: Component<JoystickProps> = ({
         },
         pressure: {
           pixels:
-            offsetHypotenuse > radius && !disableBounding
+            offsetHypotenuse > radius && boundingModel !== "none"
               ? radius
               : offsetHypotenuse,
           percentage:
-            offsetHypotenuse > radius && !disableBounding
+            offsetHypotenuse > radius && boundingModel !== "none"
               ? 100
               : Math.abs((offsetHypotenuse / radius) * 100),
         },
@@ -116,9 +127,10 @@ export const Joystick: Component<JoystickProps> = ({
       style={{ ...styles.base, ...(baseProps.style ?? {}) }}
     >
       <button
+        {...handleProps}
+        ref={handleRef}
         onpointerdown={handlePointerDown}
         disabled={disabled || (disableX && disableY)}
-        {...handleProps}
         style={styles.handle(
           xOffset(),
           yOffset(),
@@ -136,6 +148,26 @@ export type JoystickProps = {
   /* the event that fires when the joystick is moved */
   onMove?: (event: JoystickMoveEvent) => void;
 
+  /**
+   * "inner" will ensure that the handle is always contained
+   * by baseing the handle's distance from center by it's own
+   * far edge
+   *
+   * "center" will base the handle's distance from center by the
+   * center of the handle, allowing it to partially overflow
+   *
+   * "outer" will base the handle's distance from center by the
+   * outer edge of the handle, allowing it to fully overflow
+   *
+   * "none" will make it so that there is no boundy
+   **/
+  /* default: "center" */
+  boundingModel?: "inner" | "center" | "outer" | "none";
+
+  /* a number of pixels to modify the boundary, negative shrinks, positive grows */
+  /* default: 0 */
+  boundaryModifier?: number;
+
   /* disables the handle from all movement */
   disabled?: boolean;
 
@@ -144,9 +176,6 @@ export type JoystickProps = {
 
   /* disables the y axis, limiting use to the x axis, if enabled */
   disableY?: boolean;
-
-  /* disable the boundaries for the joystick handle */
-  disableBounding?: boolean;
 
   /* disable the transition animation that resets the handle location after "letting go" */
   disableResetAnimation?: boolean;
@@ -170,7 +199,7 @@ export type JoystickProps = {
   /* native props which are passed forward to the "handle" element (the grabbable element) */
   handleProps?: Omit<
     JSX.HTMLAttributes<HTMLButtonElement>,
-    "onpointerdown" | "style"
+    "onpointerdown" | "style" | "ref"
   > & { style?: JSX.CSSProperties };
 };
 

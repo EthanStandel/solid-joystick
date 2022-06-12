@@ -5,12 +5,22 @@ import { Joystick, JoystickMoveEvent } from "../components/Joystick";
 
 export default {
   title: "Example/Joystick",
+  argTypes: {
+    boundingModel: {
+      control: {
+        type: "select",
+        options: ["inner", "center", "outer", "none"],
+      },
+    },
+  },
 };
 
 const parser = new DOMParser();
 document.body.style.padding = "0";
 
 type TemplateOptions = {
+  boundingModel: "inner" | "center" | "outer" | "none";
+  boundaryModifier: number;
   disabled: boolean;
   disableX: boolean;
   disableY: boolean;
@@ -87,6 +97,8 @@ const Template = ((args: TemplateOptions) => {
 
 export const Styled = Template.bind({});
 Styled.args = {
+  boundingModel: "center",
+  boundaryModifier: 0,
   disabled: false,
   disableX: false,
   disableY: false,
@@ -142,6 +154,8 @@ Styled.args = {
 
 export const Unstyled = Template.bind({});
 Unstyled.args = {
+  boundingModel: "center",
+  boundaryModifier: 0,
   disabled: false,
   disableX: false,
   disableY: false,

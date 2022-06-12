@@ -1,6 +1,6 @@
 {
   "name": "solid-joystick",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "author": "ethan@standel.io",
   "description": "A highly configurable joystick component built in and for use in SolidJS",
   "repository": "https://github.com/EthanStandel/solid-joystick",
@@ -26,7 +26,8 @@
     "start": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "deploy-storybook": "storybook-to-ghpages && npm run fix-deploy",
-    "fix-deploy": "node ./scripts/fix-storybook-to-ghpages-deploy.js"
+    "fix-deploy": "node ./scripts/fix-storybook-to-ghpages-deploy.js",
+    "prepublishOnly": "npm run build"
   },
   "license": "MIT",
   "peerDependencies": {

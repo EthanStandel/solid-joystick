@@ -28,6 +28,26 @@ export type JoystickProps = {
   /* the event that fires when the joystick is moved */
   onMove?: (event: JoystickMoveEvent) => void;
 
+  /**
+   * "inner" will ensure that the handle is always contained
+   * by baseing the handle's distance from center by it's own
+   * far edge
+   *
+   * "center" will base the handle's distance from center by the
+   * center of the handle, allowing it to partially overflow
+   *
+   * "outer" will base the handle's distance from center by the
+   * outer edge of the handle, allowing it to fully overflow
+   *
+   * "none" will make it so that there is no boundy
+   **/
+  /* default: "center" */
+  boundingModel?: "inner" | "center" | "outer" | "none";
+
+  /* a number of pixels to modify the boundary, negative shrinks, positive grows */
+  /* default: 0 */
+  boundaryModifier?: number;
+
   /* disables the handle from all movement */
   disabled?: boolean;
 
@@ -36,9 +56,6 @@ export type JoystickProps = {
 
   /* disables the y axis, limiting use to the x axis, if enabled */
   disableY?: boolean;
-
-  /* disable the boundaries for the joystick handle */
-  disableBounding?: boolean;
 
   /* disable the transition animation that resets the handle location after "letting go" */
   disableResetAnimation?: boolean;
@@ -62,7 +79,7 @@ export type JoystickProps = {
   /* native props which are passed forward to the "handle" element (the grabbable element) */
   handleProps?: Omit<
     JSX.HTMLAttributes<HTMLButtonElement>,
-    "onpointerdown" | "style"
+    "onpointerdown" | "style" | "ref"
   > & { style?: JSX.CSSProperties };
 };
 
