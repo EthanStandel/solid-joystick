@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { Component, createSignal } from "solid-js";
 
-import { Joystick } from "../components/Joystick";
+import { Joystick, JoystickMoveEvent } from "../components/Joystick";
 
 export default {
   title: "Example/Joystick",
@@ -11,8 +11,12 @@ const parser = new DOMParser();
 document.body.style.padding = "0";
 
 type TemplateOptions = {
+  disabled: boolean;
+  disableX: boolean;
+  disableY: boolean;
   disableReset: boolean;
   disableBounding: boolean;
+  throttleEventsBy: number;
   handleChildren: string;
   baseStyles: string;
   handleStyles: string;
@@ -21,7 +25,7 @@ type TemplateOptions = {
 };
 
 const Template = ((args: TemplateOptions) => {
-  const [eventState, setEventState] = createSignal<Joystick.MoveEvent>();
+  const [eventState, setEventState] = createSignal<JoystickMoveEvent>();
   const handleChildren = parser.parseFromString(
     args.handleChildren,
     "text/html",
@@ -83,8 +87,12 @@ const Template = ((args: TemplateOptions) => {
 
 export const Styled = Template.bind({});
 Styled.args = {
+  disabled: false,
+  disableX: false,
+  disableY: false,
   disableReset: false,
   disableBounding: false,
+  throttleEventsBy: 0,
   resetAnimation: ".2s ease /* default */",
   disableResetAnimation: false,
   baseStyles: `
@@ -105,10 +113,16 @@ Styled.args = {
     &:active {
       cursor: grabbing;
     }
-    &:active,
-    &:focus-visible
-    &:focus:active {
-      box-shadow: 0px 0px 10px black;
+    &:not([disabled]) {
+      &:active,
+      &:focus-visible
+      &:focus:active {
+        box-shadow: 0px 0px 10px black;
+      }
+    }
+    &[disabled] {
+      background: lightgray;
+      cursor: not-allowed;
     }
   `,
   handleChildren: ((
@@ -128,8 +142,12 @@ Styled.args = {
 
 export const Unstyled = Template.bind({});
 Unstyled.args = {
+  disabled: false,
+  disableX: false,
+  disableY: false,
   disableReset: false,
   disableBounding: false,
+  throttleEventsBy: 0,
   resetAnimation: ".2s ease /* default */",
   disableResetAnimation: false,
   baseStyles: "",

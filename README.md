@@ -26,7 +26,16 @@ import { Joystick } from "solid-joystick";
 /* props for the Joystick component */
 export type JoystickProps = {
   /* the event that fires when the joystick is moved */
-  onMove?: (event: MoveEvent) => void;
+  onMove?: (event: JoystickMoveEvent) => void;
+
+  /* disables the handle from all movement */
+  disabled?: boolean;
+
+  /* disables the x axis, limiting use to the y axis, if enabled */
+  disableX?: boolean;
+
+  /* disables the y axis, limiting use to the x axis, if enabled */
+  disableY?: boolean;
 
   /* disable the boundaries for the joystick handle */
   disableBounding?: boolean;
@@ -41,35 +50,32 @@ export type JoystickProps = {
   /* default: ".2s ease" */
   resetAnimation?: string;
 
+  /* a time in milliseconds that incoming events should be throttled by, recommended if connected to a websocket */
+  /* default: 0 */
+  throttleEventsBy?: number;
+
   /* native props which are passed forward to the "base" element (the bounding element) */
-  baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
+  baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref"> & {
+    style?: JSX.CSSProperties;
+  };
 
   /* native props which are passed forward to the "handle" element (the grabbable element) */
   handleProps?: Omit<
     JSX.HTMLAttributes<HTMLButtonElement>,
     "onpointerdown" | "style"
-  >;
+  > & { style?: JSX.CSSProperties };
 };
 
 /* The data which is forwarded when the handle is moved */
 export type JoystickMoveEvent = {
-  /* the offset, in pixels, that the handle has been dragged from its initial position */ 
-  offset: {
-    x: number;
-    y: number;
-  };
+  /* the offset, in pixels, that the handle has been dragged from its initial position */
+  offset: { x: number; y: number };
 
   /* the angle that the joystick has been dragged, offered in both radians & degrees */
-  angle: {
-    radians: number;
-    degrees: number;
-  };
+  angle: { radians: number; degrees: number };
 
   /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
-  pressure: {
-    pixels: number;
-    percentage: number;
-  };
+  pressure: { pixels: number; percentage: number };
 };
 ```
 

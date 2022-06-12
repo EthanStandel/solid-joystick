@@ -7,6 +7,10 @@ export const Joystick: Component<JoystickProps> = ({
   onMove,
   disableReset,
   disableResetAnimation,
+  disabled,
+  disableX,
+  disableY,
+  throttleEventsBy = 0,
   resetAnimation = ".2s ease",
   disableBounding = false,
   baseProps = {},
@@ -18,25 +22,46 @@ export const Joystick: Component<JoystickProps> = ({
   let handleState = initialStates.handleState();
   let baseRef: HTMLDivElement | undefined;
 
+  const onMoveThrottled = (() => {
+    if (onMove && throttleEventsBy !== 0) {
+      let lastTime = 0;
+      return (event: JoystickMoveEvent) => {
+        const now = new Date().getTime();
+        if (now - lastTime >= throttleEventsBy) {
+          lastTime = now;
+          onMove(event);
+        }
+      };
+    } else {
+      return onMove;
+    }
+  })();
+
   const handlePointerMove = (event: PointerEvent) => {
     event.preventDefault();
-    if (handleState.dragging && baseRef) {
-      const radius = baseRef.clientWidth / 2;
-      const xOffset = event.clientX - handleState.initialOffsets.x;
-      const yOffset = event.clientY - handleState.initialOffsets.y;
+    if (handleState.dragging && baseRef && !disabled) {
+      const radius = baseRef!.clientWidth / 2;
+      const xOffset = disableX
+        ? 0
+        : event.clientX - handleState.initialOffsets.x;
+      const yOffset = disableY
+        ? 0
+        : event.clientY - handleState.initialOffsets.y;
       const offsetHypotenuse = Trig.hypotenuse(xOffset, yOffset);
       const radians = Trig.angleRadians(xOffset, yOffset);
-      const handleXOffset =
-        offsetHypotenuse < radius || disableBounding
-          ? xOffset
-          : Trig.getMaxX(radians, radius);
-      const handleYOffset =
-        offsetHypotenuse < radius || disableBounding
-          ? yOffset
-          : Trig.getMaxY(radians, radius);
+      const handleXOffset = disableX
+        ? 0
+        : offsetHypotenuse < radius || disableBounding
+        ? xOffset
+        : Trig.getMaxX(radians, radius);
+      const handleYOffset = disableY
+        ? 0
+        : offsetHypotenuse < radius || disableBounding
+        ? yOffset
+        : Trig.getMaxY(radians, radius);
       setXOffset(handleXOffset);
       setYOffset(handleYOffset);
-      onMove?.({
+      onMoveThrottled?.({
         offset: { x: handleXOffset, y: handleYOffset },
         angle: {
           radians: radians,
@@ -85,16 +110,22 @@ export const Joystick: Component<JoystickProps> = ({
   onMove?.(initialStates.eventState());
 
   return (
-    <div style={styles.base} ref={baseRef} {...baseProps}>
+    <div
+      {...baseProps}
+      ref={baseRef}
+      style={{ ...styles.base, ...(baseProps.style ?? {}) }}
+    >
       <button
         onpointerdown={handlePointerDown}
+        disabled={disabled || (disableX && disableY)}
+        {...handleProps}
         style={styles.handle(
           xOffset(),
           yOffset(),
           shouldTransition() && !disableResetAnimation,
           resetAnimation,
+          handleProps.style,
         )}
-        {...handleProps}
       />
     </div>
   );
@@ -104,6 +135,15 @@ export const Joystick: Component<JoystickProps> = ({
 export type JoystickProps = {
   /* the event that fires when the joystick is moved */
   onMove?: (event: JoystickMoveEvent) => void;
+
+  /* disables the handle from all movement */
+  disabled?: boolean;
+
+  /* disables the x axis, limiting use to the y axis, if enabled */
+  disableX?: boolean;
+
+  /* disables the y axis, limiting use to the x axis, if enabled */
+  disableY?: boolean;
 
   /* disable the boundaries for the joystick handle */
   disableBounding?: boolean;
@@ -118,35 +158,32 @@ export type JoystickProps = {
   /* default: ".2s ease" */
   resetAnimation?: string;
 
+  /* a time in milliseconds that incoming events should be throttled by, recommended if connected to a websocket */
+  /* default: 0 */
+  throttleEventsBy?: number;
+
   /* native props which are passed forward to the "base" element (the bounding element) */
-  baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref">;
+  baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref"> & {
+    style?: JSX.CSSProperties;
+  };
 
   /* native props which are passed forward to the "handle" element (the grabbable element) */
   handleProps?: Omit<
     JSX.HTMLAttributes<HTMLButtonElement>,
     "onpointerdown" | "style"
-  >;
+  > & { style?: JSX.CSSProperties };
 };
 
 /* The data which is forwarded when the handle is moved */
 export type JoystickMoveEvent = {
   /* the offset, in pixels, that the handle has been dragged from its initial position */
-  offset: {
-    x: number;
-    y: number;
-  };
+  offset: { x: number; y: number };
 
   /* the angle that the joystick has been dragged, offered in both radians & degrees */
-  angle: {
-    radians: number;
-    degrees: number;
-  };
+  angle: { radians: number; degrees: number };
 
   /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
-  pressure: {
-    pixels: number;
-    percentage: number;
-  };
+  pressure: { pixels: number; percentage: number };
 };
 
 const initialStates = {
@@ -174,9 +211,11 @@ const styles = {
     y: number,
     shouldTransition: boolean,
     resetAnimation?: string,
+    otherStyles: JSX.CSSProperties = {},
   ): JSX.CSSProperties => ({
     "touch-action": "none",
     transform: `translate(${x}px,${y}px)`,
     ...(shouldTransition ? { transition: `all ${resetAnimation}` } : {}),
+    ...otherStyles,
   }),
 };
