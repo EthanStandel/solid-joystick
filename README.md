@@ -71,6 +71,15 @@ export type JoystickProps = {
   /* default: 0 */
   throttleEventsBy?: number;
 
+  /**
+   * enables gamepad support, great for if you want your application to support a virtual joystick and a hardware joystick
+   *
+   * WARNING: the Gamepad API requires polling which can severely limit performance of the surrounding application
+   *
+   * default: undefined (which disables the feature)
+   **/
+  enableGamepadSupport?: boolean | Partial<GamepadSupportOptions>;
+
   /* native props which are passed forward to the "base" element (the bounding element) */
   baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref"> & {
     style?: JSX.CSSProperties;
@@ -83,16 +92,39 @@ export type JoystickProps = {
   > & { style?: JSX.CSSProperties };
 };
 
-/* The data which is forwarded when the handle is moved */
+/* data which is forwarded when the handle is moved */
 export type JoystickMoveEvent = {
-  /* the offset, in pixels, that the handle has been dragged from its initial position */
+  /* offset, in pixels, that the handle has been dragged from its initial position */
   offset: { x: number; y: number };
 
-  /* the angle that the joystick has been dragged, offered in both radians & degrees */
+  /* angle that the joystick has been dragged, offered in both radians & degrees */
   angle: { radians: number; degrees: number };
 
-  /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
+  /* total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
   pressure: { pixels: number; percentage: number };
+};
+
+/* config for gamepad support implementation */
+export type GamepadSupportOptions = {
+  /* which axis would you like to forward to events from; 0 is usually left and 2 is usually right */
+  /* default: 0 */
+  xIndex: number;
+
+  /* which axis would you like to forward to events from; 1 is usually left and 3 is usually right */
+  /* default: 1 */
+  yIndex: number;
+
+  /* the gamepad in the array you'd like to use, very likely to be 0 */
+  /* default: 0 */
+  index: number;
+
+  /* either check the gamepad on every available animation frame or check it on recursive setTimeouts */
+  /* default: "requestAnimationFrame" */
+  pollingModel: "requestAnimationFrame" | number;
+
+  /* The percentage from the base you'd like to ignore, to avoid physical innaccuracies */
+  /* default: 0.05 (5%) */
+  deadzonePercent: number;
 };
 ```
 

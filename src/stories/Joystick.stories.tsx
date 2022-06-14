@@ -1,7 +1,12 @@
 import { css } from "@emotion/css";
 import { Component, createSignal } from "solid-js";
 
-import { Joystick, JoystickMoveEvent } from "../components/Joystick";
+import {
+  Joystick,
+  JoystickMoveEvent,
+  GamepadSupportOptions,
+  initialStates,
+} from "../components/Joystick";
 
 export default {
   title: "Example/Joystick",
@@ -31,6 +36,7 @@ type TemplateOptions = {
   handleStyles: string;
   disableResetAnimation: boolean;
   resetAnimation: string;
+  enableGamepadSupport: GamepadSupportOptions;
 };
 
 const Template = ((args: TemplateOptions) => {
@@ -148,6 +154,7 @@ Styled.args = {
       Drag 🕹 me!
     </span>
   ) as HTMLSpanElement)!.outerHTML,
+  enableGamepadSupport: initialStates.gamepadConfig(true),
 };
 
 export const Unstyled = Template.bind({});
@@ -164,4 +171,5 @@ Unstyled.args = {
   baseStyles: "",
   handleStyles: "",
   handleChildren: "Drag 🕹 me",
+  enableGamepadSupport: initialStates.gamepadConfig(true),
 };

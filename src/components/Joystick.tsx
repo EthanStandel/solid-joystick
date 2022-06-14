@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createSignal, onMount } from "solid-js";
 import type { JSX } from "solid-js/types";
 
 import { Trig } from "../utils/Trig";
@@ -14,15 +14,34 @@ export const Joystick: Component<JoystickProps> = ({
   boundaryModifier = 0,
   throttleEventsBy = 0,
   resetAnimation = ".2s ease",
+  enableGamepadSupport,
   baseProps = {},
   handleProps = {},
 }) => {
   const [xOffset, setXOffset] = createSignal(0);
   const [yOffset, setYOffset] = createSignal(0);
   const [shouldTransition, setShouldTransition] = createSignal(false);
-  let handleState = initialStates.handleState();
+  const handleState = initialStates.handleState();
   let baseRef: HTMLDivElement | undefined;
   let handleRef: HTMLButtonElement | undefined;
+
+  const getRadius = () => {
+    if (baseRef && handleRef) {
+      const edgeBoundingModifier =
+        boundingModel === "inner" || boundingModel === "outer"
+          ? Math.max(handleRef.clientWidth, handleRef.clientHeight) / 2
+          : 0;
+      return (
+        baseRef.clientWidth / 2 +
+        (boundingModel === "outer"
+          ? edgeBoundingModifier
+          : -edgeBoundingModifier) +
+        boundaryModifier
+      );
+    } else {
+      throw new Error("Trying to get radius before baseRef rendered");
+    }
+  };
 
   const onMoveThrottled = (() => {
     if (onMove && throttleEventsBy !== 0) {
@@ -39,25 +58,14 @@ export const Joystick: Component<JoystickProps> = ({
     }
   })();
 
-  const handlePointerMove = (event: PointerEvent) => {
-    event.preventDefault();
-    if (handleState.dragging && baseRef && handleRef && !disabled) {
-      const edgeBoundingModifier =
-        boundingModel === "inner" || boundingModel === "outer"
-          ? Math.max(handleRef.clientWidth, handleRef.clientHeight) / 2
-          : 0;
-      const radius =
-        baseRef.clientWidth / 2 +
-        (boundingModel === "outer"
-          ? edgeBoundingModifier
-          : -edgeBoundingModifier) +
-        boundaryModifier;
-      const xOffset = disableX
-        ? 0
-        : event.clientX - handleState.initialOffsets.x;
-      const yOffset = disableY
-        ? 0
-        : event.clientY - handleState.initialOffsets.y;
+  const handleHandleMove = (xOffset: number, yOffset: number) => {
+    const radius = getRadius();
+    if (
+      (handleState.pointerDragging || handleState.gamepadDragging) &&
+      baseRef &&
+      handleRef &&
+      !disabled
+    ) {
       const offsetHypotenuse = Trig.hypotenuse(xOffset, yOffset);
       const radians = Trig.angleRadians(xOffset, yOffset);
       const handleXOffset = disableX
@@ -92,11 +100,75 @@ export const Joystick: Component<JoystickProps> = ({
     }
   };
 
+  if (enableGamepadSupport) {
+    onMount(() => {
+      const gamepadConfig = initialStates.gamepadConfig(enableGamepadSupport);
+
+      const getGamepad = () =>
+        window.navigator.getGamepads()?.[gamepadConfig.index];
+      window.addEventListener("gamepadconnected", (event: GamepadEvent) => {
+        if (event.gamepad.index === gamepadConfig.index) {
+          checkGamepad();
+        }
+      });
+
+      const onGamepadUpdate = () => {
+        const gamepad = getGamepad();
+        if (gamepad) {
+          const radius = getRadius();
+          const x = gamepad.axes[gamepadConfig.xIndex];
+          const y = gamepad.axes[gamepadConfig.yIndex];
+          const deadX = Math.abs(x) < gamepadConfig.deadzonePercent;
+          const deadY = Math.abs(y) < gamepadConfig.deadzonePercent;
+          if (!deadX || !deadY) {
+            const xMoved = x !== handleState.initialOffsets.x;
+            const yMoved = y !== handleState.initialOffsets.y;
+            if (xMoved || yMoved) {
+              Object.assign(handleState, {
+                gamepadDragging: true,
+                initialOffsets: { x, y },
+              });
+              setShouldTransition(false);
+              handleHandleMove(x * radius, y * radius);
+            }
+          } else if (deadX && deadY && handleState.gamepadDragging) {
+            Object.assign(handleState, {
+              gamepadDragging: false,
+              initialOffsets: { x: 0, y: 0 },
+            });
+            setShouldTransition(true);
+            setXOffset(0);
+            setYOffset(0);
+            onMove?.(initialStates.eventState());
+          }
+          checkGamepad();
+        }
+      };
+
+      const checkGamepad = () => {
+        if (gamepadConfig.pollingModel === "requestAnimationFrame") {
+          requestAnimationFrame(onGamepadUpdate);
+        } else if (typeof gamepadConfig.pollingModel === "number") {
+          setTimeout(onGamepadUpdate, gamepadConfig.pollingModel);
+        }
+      };
+
+      checkGamepad();
+    });
+  }
+
+  const handlePointerMove = (event: PointerEvent) => {
+    event.preventDefault();
+    const xOffset = disableX ? 0 : event.clientX - handleState.initialOffsets.x;
+    const yOffset = disableY ? 0 : event.clientY - handleState.initialOffsets.y;
+    handleHandleMove(xOffset, yOffset);
+  };
+
   const handlePointerUp = () => {
     window.removeEventListener("pointermove", handlePointerMove);
     setShouldTransition(true);
     if (!disableReset) {
-      handleState = initialStates.handleState();
+      Object.assign(handleState, initialStates.handleState());
       setYOffset(0);
       setXOffset(0);
       onMove?.(initialStates.eventState());
@@ -107,14 +179,14 @@ export const Joystick: Component<JoystickProps> = ({
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", handlePointerUp, { once: true });
     setShouldTransition(false);
-    if (!disableReset || !handleState.dragging) {
-      handleState = {
-        dragging: true,
+    if (!disableReset || !handleState.pointerDragging) {
+      Object.assign(handleState, {
+        pointerDragging: true,
         initialOffsets: {
           x: event.clientX,
           y: event.clientY,
         },
-      };
+      });
     }
   };
 
@@ -191,6 +263,15 @@ export type JoystickProps = {
   /* default: 0 */
   throttleEventsBy?: number;
 
+  /**
+   * enables gamepad support, great for if you want your application to support a virtual joystick and a hardware joystick
+   *
+   * WARNING: the Gamepad API requires polling which can severely limit performance of the surrounding application
+   *
+   * default: undefined (which disables the feature)
+   **/
+  enableGamepadSupport?: boolean | Partial<GamepadSupportOptions>;
+
   /* native props which are passed forward to the "base" element (the bounding element) */
   baseProps?: Omit<JSX.HTMLAttributes<HTMLDivElement>, "style" | "ref"> & {
     style?: JSX.CSSProperties;
@@ -203,27 +284,61 @@ export type JoystickProps = {
   > & { style?: JSX.CSSProperties };
 };
 
-/* The data which is forwarded when the handle is moved */
+/* data which is forwarded when the handle is moved */
 export type JoystickMoveEvent = {
-  /* the offset, in pixels, that the handle has been dragged from its initial position */
+  /* offset, in pixels, that the handle has been dragged from its initial position */
   offset: { x: number; y: number };
 
-  /* the angle that the joystick has been dragged, offered in both radians & degrees */
+  /* angle that the joystick has been dragged, offered in both radians & degrees */
   angle: { radians: number; degrees: number };
 
-  /* the total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
+  /* total distance that the handle has been dragged from the center of the base, offered in both pixels & percentage */
   pressure: { pixels: number; percentage: number };
 };
 
-const initialStates = {
+/* config for gamepad support implementation */
+export type GamepadSupportOptions = {
+  /* which axis would you like to forward to events from; 0 is usually left and 2 is usually right */
+  /* default: 0 */
+  xIndex: number;
+
+  /* which axis would you like to forward to events from; 1 is usually left and 3 is usually right */
+  /* default: 1 */
+  yIndex: number;
+
+  /* the gamepad in the array you'd like to use, very likely to be 0 */
+  /* default: 0 */
+  index: number;
+
+  /* either check the gamepad on every available animation frame or check it on recursive setTimeouts */
+  /* default: "requestAnimationFrame" */
+  pollingModel: "requestAnimationFrame" | number;
+
+  /* The percentage from the base you'd like to ignore, to avoid physical innaccuracies */
+  /* default: 0.05 (5%) */
+  deadzonePercent: number;
+};
+
+export const initialStates = {
   handleState: () => ({
-    dragging: false,
+    pointerDragging: false,
+    gamepadDragging: false,
     initialOffsets: { x: 0, y: 0 },
   }),
   eventState: () => ({
     offset: { x: 0, y: 0 },
     angle: { radians: 0, degrees: 0 },
     pressure: { pixels: 0, percentage: 0 },
+  }),
+  gamepadConfig: (
+    gamepadSupportProp: Partial<GamepadSupportOptions> | true,
+  ): GamepadSupportOptions => ({
+    xIndex: 0,
+    yIndex: 1,
+    index: 0,
+    deadzonePercent: 0.05,
+    pollingModel: "requestAnimationFrame",
+    ...(gamepadSupportProp !== true ? gamepadSupportProp : {}),
   }),
 };
 
