@@ -8,7 +8,7 @@ The development-time flow utilizes Storybook using the @storybook/html flow as S
 
 [Storybook demos](https://ethanstandel.github.io/solid-joystick/)
 
-[Applied example code](https://github.com/EthanStandel/solid-joystick-applied)
+[Applied example code](https://github.com/EthanStandel/solid-joystick-applied)  
 [Applied example demo](https://ethanstandel.github.io/solid-joystick-applied/)
 
 ## Usage
