@@ -1,6 +1,6 @@
 {
   "name": "solid-joystick",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "ethan@standel.io",
   "description": "A highly configurable joystick component built in and for use in SolidJS",
   "repository": "https://github.com/EthanStandel/solid-joystick",
