@@ -4,7 +4,12 @@ A joystick component built in and for use in SolidJS applications with zero runt
 
 The development-time flow utilizes Storybook using the @storybook/html flow as Solid lacks official Storybook support and the project is built with Vite.
 
-## [Demo example](https://ethanstandel.github.io/solid-joystick/)
+## Demos 
+
+[Storybook demos](https://ethanstandel.github.io/solid-joystick/)
+
+[Applied example code](https://github.com/EthanStandel/solid-joystick-applied)
+[Applied example demo](https://ethanstandel.github.io/solid-joystick-applied/)
 
 ## Usage
 
