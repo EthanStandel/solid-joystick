@@ -1,6 +1,6 @@
 import { onCleanup, createSignal, createEffect } from "solid-js";
 
-import { JoystickPlugin } from "../Joystick";
+import { initialStates, JoystickPlugin } from "../Joystick";
 
 /**
  * This plugin enables click and single-touch event handling at high-performance.
@@ -24,6 +24,7 @@ export const KeyboardPlugin: (
     setXOffset,
     setYOffset,
     setShouldTransition,
+    onMove,
   }) => {
     const [activeKeys, setActiveKeys] = createSignal<{
       up?: boolean;
@@ -55,6 +56,7 @@ export const KeyboardPlugin: (
           handleState.pluginDragging[pluginIndex] = false;
           setXOffset(0);
           setYOffset(0);
+          onMove?.(initialStates.eventState());
         } else {
           handleState.pluginDragging[pluginIndex] = true;
         }
