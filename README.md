@@ -39,6 +39,35 @@ const Example = () => (
 );
 ```
 
+### Plugins
+
+#### PointerPlugin
+
+This is the most generic plugin. This should be used in all scenarios where a single `Joystick` element will be in use.
+Using `PointerEvents` allows for a single managed listener to handle single-touch and mouse events and can provide
+better performance than if using both `MouseEvents` and `TouchEvents`.
+
+#### GamepadPlugin
+
+This plugin can be used to connect the hardware joystick of a gamepad to the on screen joystick. This will also allow
+event mapping to happen through this single API. This is great for applications which want to support a hardware
+gamepad and fallback to touchscreen support.
+
+#### MousePlugin
+
+This plugin should be used in tandem with the `MultiTouchPlugin` in scenarios that require multitouch but the user
+may also expect to be able to interact using their mouse.
+
+#### MultitouchPlugin
+
+This plugin should be used in scenarios with multiple joysticks that may both be used at the same time. It should be
+used in tandem with the `MousePlugin` for scenarios where the user may expect to be able to use their mouse.
+
+#### KeyboardPlugin
+
+This plugin should be used in scenarios where use of keyboard controls are appropriate, such as when navigating 3D
+spaces in a first-person perspective using WASD.
+
 ### Important types
 
 ```ts
@@ -202,6 +231,15 @@ export type JoystickPlugin = (
       pluginDragging: Array<boolean>;
       initialOffsets: { x: number; y: number };
     };
+    /**
+     * A ref for the handle element.
+     */
+    handleRef: { current?: HTMLButtonElement };
+
+    /**
+     * A ref for the base element.
+     */
+    baseRef: { current?: HTMLDivElement };
   } & JoystickProps,
 ) => void;
 ```

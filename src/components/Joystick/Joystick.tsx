@@ -22,17 +22,20 @@ export const Joystick: Component<Partial<JoystickProps>> = ({
   const [yOffset, setYOffset] = createSignal(0);
   const [shouldTransition, setShouldTransition] = createSignal(false);
   const handleState = initialStates.handleState();
-  let baseRef: HTMLDivElement | undefined;
-  let handleRef: HTMLButtonElement | undefined;
+  const baseRef = { current: undefined as HTMLDivElement | undefined };
+  const handleRef = { current: undefined as HTMLButtonElement | undefined };
 
   const getRadius = () => {
-    if (baseRef && handleRef) {
+    if (baseRef.current && handleRef.current) {
       const edgeBoundingModifier =
         boundingModel === "inner" || boundingModel === "outer"
-          ? Math.max(handleRef.clientWidth, handleRef.clientHeight) / 2
+          ? Math.max(
+              handleRef.current.clientWidth,
+              handleRef.current.clientHeight,
+            ) / 2
           : 0;
       return (
-        baseRef.clientWidth / 2 +
+        baseRef.current.clientWidth / 2 +
         (boundingModel === "outer"
           ? edgeBoundingModifier
           : -edgeBoundingModifier) +
@@ -96,8 +99,8 @@ export const Joystick: Component<Partial<JoystickProps>> = ({
               : offsetHypotenuse,
           percentage:
             offsetHypotenuse > radius && boundingModel !== "none"
-              ? 100
-              : Math.abs((offsetHypotenuse / radius) * 100),
+              ? 1
+              : Math.abs(offsetHypotenuse / radius),
         },
       });
     }
@@ -133,18 +136,20 @@ export const Joystick: Component<Partial<JoystickProps>> = ({
       setShouldTransition,
       pluginIndex,
       handleState,
+      handleRef,
+      baseRef,
     }),
   );
 
   return (
     <div
       {...baseProps}
-      ref={baseRef}
+      ref={baseRef.current}
       style={{ ...styles.base, ...(baseProps.style ?? {}) }}
     >
       <button
         {...handleProps}
-        ref={handleRef}
+        ref={handleRef.current}
         disabled={disabled || (disableX && disableY)}
         style={styles.handle(
           xOffset(),
@@ -318,6 +323,15 @@ export type JoystickPlugin = (
       pluginDragging: Array<boolean>;
       initialOffsets: { x: number; y: number };
     };
+    /**
+     * A ref for the handle element.
+     */
+    handleRef: { current?: HTMLButtonElement };
+
+    /**
+     * A ref for the base element.
+     */
+    baseRef: { current?: HTMLDivElement };
   } & JoystickProps,
 ) => void;
 

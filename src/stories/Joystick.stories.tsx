@@ -6,8 +6,12 @@ import {
   GamepadPluginOptions,
   GamepadPlugin,
   initialGamepadConfig,
-} from "../components/Joystick/plugins/GamepadPlugin";
-import { PointerPlugin } from "../components/Joystick/plugins/PointerPlugin";
+  PointerPlugin,
+  MousePlugin,
+  MultiTouchPlugin,
+  KeyboardPlugin,
+  initialKeyboardPluginOptions,
+} from "../components/Joystick/plugins";
 
 export default {
   title: "Example/Joystick",
@@ -83,7 +87,7 @@ const Template = ((args: TemplateOptions) => {
             gap: "2rem",
           }}
         >
-          {Array.from({ length: args.dual ? 2 : 1 }).map(() => (
+          {Array.from({ length: args.dual ? 2 : 1 }).map((_, index) => (
             <div
               style={{
                 height: `min(${100 / (args.dual ? 2 : 1)}vh, ${
@@ -98,8 +102,19 @@ const Template = ((args: TemplateOptions) => {
               <Joystick
                 {...args}
                 plugins={[
-                  GamepadPlugin(args.gamepadPluginConfig),
-                  PointerPlugin(),
+                  GamepadPlugin(
+                    args.dual && index === 1
+                      ? { ...args.gamepadPluginConfig, xIndex: 2, yIndex: 3 }
+                      : args.gamepadPluginConfig,
+                  ),
+                  KeyboardPlugin(
+                    args.dual && index === 1
+                      ? initialKeyboardPluginOptions("arrows")
+                      : initialKeyboardPluginOptions("wasd"),
+                  ),
+                  ...(args.dual
+                    ? [MousePlugin(), MultiTouchPlugin()]
+                    : [PointerPlugin()]),
                 ]}
                 onMove={event => {
                   event.angle.degrees;
