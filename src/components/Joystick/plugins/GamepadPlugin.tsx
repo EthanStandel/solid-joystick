@@ -8,7 +8,7 @@ import { initialStates, JoystickPlugin } from "../Joystick";
  * **WARNING**: The Gamepad API requires polling which can severely limit performance of the surrounding application, use with caution.
  **/
 export const GamepadPlugin: (
-  gamepadOptions: Partial<GamepadPluginOptions>,
+  gamepadOptions?: Partial<GamepadPluginOptions>,
 ) => JoystickPlugin =
   (gamepadOptions = {}) =>
   ({

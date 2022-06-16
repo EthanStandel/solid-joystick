@@ -28,11 +28,12 @@ import {
 } from "solid-joystick";
 
 const Example = () => (
-  <div style={{ width: "250px", height: "250" }}>
+  <div style={{ width: "250px", height: "250px" }}>
     <Joystick 
+      onMove={console.log}
       plugins={[PointerPlugin(), GamepadPlugin()]}
-      handleProps={{ style: { background: "red", width: "25%", height: "25%" } }}
-      handleProps={{ style: { background: "black" } }}
+      handleProps={{ style: { background: "red", width: "25%", height: "25%", "border-radius": "50%" } }}
+      baseProps={{ style: { background: "black", "border-radius": "50%" } }}
     />
   </div>
 );
