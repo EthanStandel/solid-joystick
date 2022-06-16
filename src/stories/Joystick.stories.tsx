@@ -1,12 +1,13 @@
 import { css } from "@emotion/css";
 import { Component, createSignal } from "solid-js";
 
+import { Joystick, JoystickMoveEvent } from "../components/Joystick/Joystick";
 import {
-  Joystick,
-  JoystickMoveEvent,
-  GamepadSupportOptions,
-  initialStates,
-} from "../components/Joystick";
+  GamepadPluginOptions,
+  GamepadPlugin,
+  initialGamepadConfig,
+} from "../components/Joystick/plugins/GamepadPlugin";
+import { PointerPlugin } from "../components/Joystick/plugins/PointerPlugin";
 
 export default {
   title: "Example/Joystick",
@@ -36,7 +37,8 @@ type TemplateOptions = {
   handleStyles: string;
   disableResetAnimation: boolean;
   resetAnimation: string;
-  enableGamepadSupport: GamepadSupportOptions;
+  gamepadPluginConfig: GamepadPluginOptions;
+  dual: boolean;
 };
 
 const Template = ((args: TemplateOptions) => {
@@ -72,28 +74,51 @@ const Template = ((args: TemplateOptions) => {
       <div>
         <div
           style={{
-            height: "min(95vh, 95vw)",
-            width: "min(95vh, 95vw)",
+            height: "min(100vh, 100vw)",
+            width: "min(100vh, 100vw)",
+            display: "flex",
+            "flex-direction": "row",
+            "justify-content": "space-between",
+            "align-items": "center",
+            gap: "2rem",
           }}
         >
-          <Joystick
-            {...args}
-            onMove={event => {
-              event.angle.degrees;
-              setEventState(event);
-            }}
-            handleProps={{
-              children: handleChildren,
-              class: css`
-                ${args.handleStyles}
-              `,
-            }}
-            baseProps={{
-              class: css`
-                ${args.baseStyles}
-              `,
-            }}
-          />
+          {Array.from({ length: args.dual ? 2 : 1 }).map(() => (
+            <div
+              style={{
+                height: `min(${100 / (args.dual ? 2 : 1)}vh, ${
+                  100 / (args.dual ? 2 : 1)
+                }vw)`,
+                width: `min(${100 / (args.dual ? 2 : 1)}vh, ${
+                  100 / (args.dual ? 2 : 1)
+                }vw)`,
+                "aspect-ratio": "1/1",
+              }}
+            >
+              <Joystick
+                {...args}
+                plugins={[
+                  GamepadPlugin(args.gamepadPluginConfig),
+                  PointerPlugin(),
+                ]}
+                onMove={event => {
+                  event.angle.degrees;
+                  setEventState(event);
+                }}
+                handleProps={{
+                  children: handleChildren?.cloneNode(true),
+                  class: css`
+                    ${args.handleStyles}
+                  `,
+                }}
+                baseProps={{
+                  class: css`
+                    ${args.baseStyles}
+                  `,
+                }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -154,7 +179,8 @@ Styled.args = {
       Drag 🕹 me!
     </span>
   ) as HTMLSpanElement)!.outerHTML,
-  enableGamepadSupport: initialStates.gamepadConfig(true),
+  gamepadPluginConfig: initialGamepadConfig(),
+  dual: false,
 };
 
 export const Unstyled = Template.bind({});
@@ -171,5 +197,6 @@ Unstyled.args = {
   baseStyles: "",
   handleStyles: "",
   handleChildren: "Drag 🕹 me",
-  enableGamepadSupport: initialStates.gamepadConfig(true),
+  gamepadPluginConfig: initialGamepadConfig(),
+  dual: false,
 };
