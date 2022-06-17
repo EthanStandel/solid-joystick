@@ -66,7 +66,14 @@ used in tandem with the `MousePlugin` for scenarios where the user may expect to
 #### KeyboardPlugin
 
 This plugin should be used in scenarios where use of keyboard controls are appropriate, such as when navigating 3D
-spaces in a first-person perspective using WASD.
+spaces in a first-person perspective using WASD. To make a first-person game, this plugin works well with the 
+`PointerLockPlugin`.
+
+#### PointerLockPlugin
+
+This plugin should be used for situations where mouse movement should be directly tied to the item controlled by the 
+joystick. This works well for controlling cameras in 3D spaces. To make a first-person game, this plugin works well
+with the `KeyboardPlugin`.
 
 ### Important types
 

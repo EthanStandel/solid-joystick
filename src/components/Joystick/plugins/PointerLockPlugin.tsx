@@ -2,11 +2,13 @@ import { Trig } from "../../../utils/Trig";
 import { initialStates, JoystickPlugin } from "../Joystick";
 
 /**
- * This plugin enables multitouch. It should be used with the `MousePlugin` in situations where multitouch is required. Otherwise, the PointerPlugin should be used as it as higher performance with single-touch events.
+ * This plugin allows for mouse movement to be bound to to a locked pointer. This is best for representing a viewpoint in a 3D space and first-person games.
  */
-export const PointerLockPlugin: () => JoystickPlugin =
-  () =>
-  ({ handleProps, getRadius, setXOffset, setYOffset, onMove }) => {
+export const PointerLockPlugin: (
+  options?: Partial<PointerLockPluginOptions>,
+) => JoystickPlugin =
+  ({ hideOnLock = false } = {}) =>
+  ({ handleProps, getRadius, setXOffset, setYOffset, onMove, baseRef }) => {
     const canvas = (
       <canvas
         style={{
@@ -18,18 +20,52 @@ export const PointerLockPlugin: () => JoystickPlugin =
       />
     ) as HTMLCanvasElement;
 
-    const otherHandleChildren = handleProps.children ?? null;
+    const handleChildrenRef = handleProps.children ?? null;
     handleProps.children = (
       <>
-        {otherHandleChildren}
+        {handleChildrenRef}
         {canvas}
       </>
     );
 
+    const onLock = (locked: boolean) => {
+      if (baseRef.current && hideOnLock) {
+        baseRef.current.style.visibility = locked ? "hidden" : "unset";
+      }
+    };
+
     const mouseListener = () => {
       const radius = getRadius();
       const offsetMultiplier = radius * 0.1;
+      let latestEvent: undefined | MouseEvent;
+
+      const reset = () => {
+        setXOffset(0);
+        setYOffset(0);
+        onMove(initialStates.eventState());
+      };
+
+      const onAnimationFrame = () => {
+        requestAnimationFrame(() => {
+          if (!document.pointerLockElement) {
+            reset();
+            onLock(false);
+            document.removeEventListener("mousemove", onMouseMove);
+          } else {
+            if (latestEvent) {
+              latestEvent = undefined;
+            } else {
+              reset();
+            }
+            onAnimationFrame();
+          }
+        });
+      };
+
+      onAnimationFrame();
+
       const onMouseMove = (event: MouseEvent) => {
+        latestEvent = event;
         if (document.pointerLockElement) {
           setXOffset(event.movementX * offsetMultiplier);
           setYOffset(event.movementY * offsetMultiplier);
@@ -55,22 +91,29 @@ export const PointerLockPlugin: () => JoystickPlugin =
               percentage: offsetHypotenuse * offsetMultiplier,
             },
           });
-        } else {
-          setXOffset(event.movementX * offsetMultiplier);
-          setYOffset(event.movementY * offsetMultiplier);
-          onMove(initialStates.eventState());
-          document.removeEventListener("mousemove", onMouseMove);
         }
       };
       document.addEventListener("mousemove", onMouseMove);
     };
 
-    const otherHandleClickHandler = handleProps.onclick;
+    const handleClickHandlerRef = handleProps.onclick;
     handleProps.onclick = event => {
-      if (typeof otherHandleClickHandler === "function") {
-        otherHandleClickHandler(event);
+      if (typeof handleClickHandlerRef === "function") {
+        handleClickHandlerRef(event);
       }
+      onLock(true);
       canvas.requestPointerLock();
-      mouseListener();
+      setTimeout(() => mouseListener(), 100); // waiting a little bit for pointerLockElement mount
     };
   };
+
+/**
+ * The config for pointer-lock support implementation.
+ **/
+export type PointerLockPluginOptions = {
+  /**
+   * When the pointer is locked, hide the visual joystick.
+   * default: false
+   **/
+  hideOnLock: boolean;
+};
