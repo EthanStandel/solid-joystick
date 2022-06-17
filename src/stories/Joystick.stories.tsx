@@ -11,6 +11,7 @@ import {
   MultiTouchPlugin,
   KeyboardPlugin,
   initialKeyboardPluginOptions,
+  PointerLockPlugin,
 } from "../components/Joystick/plugins";
 
 export default {
@@ -102,6 +103,7 @@ const Template = ((args: TemplateOptions) => {
               <Joystick
                 {...args}
                 plugins={[
+                  PointerLockPlugin(),
                   GamepadPlugin(
                     args.dual && index === 1
                       ? { ...args.gamepadPluginConfig, xIndex: 2, yIndex: 3 }

@@ -3,3 +3,4 @@ export * from "./PointerPlugin";
 export * from "./MultiTouchPlugin";
 export * from "./MousePlugin";
 export * from "./KeyboardPlugin";
+export * from "./PointerLockPlugin";
